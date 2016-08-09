@@ -60,3 +60,6 @@ sudo chmod a+x /etc/dash/mac-<MAC_ADDRESS>.d/20-script-name.sh
 ```
 
 If you wish to extend the default actions that each button gets then modify the /etc/dash/mac-skeleton.d directory scripts
+
+
+Last Update: 201608090201 by bald-kevin
