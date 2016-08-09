@@ -39,7 +39,7 @@ sudo ./dash-add.sh 00:22:33:55:11:F3
 
 You can execute the dash listener in interactive mode as follows:
 
-``bash
+```bash
 cd /etc/dash
 sudo ./dash-button-listen
 ```
