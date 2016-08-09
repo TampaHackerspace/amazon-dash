@@ -17,7 +17,6 @@ Debian linux utils and scripts to manage amazon dash buttons
   4. Follow instructions but do NOT select a product
   5. Disable Dash notifications on your phone
     1. Amazon App > Menu > Notifications > Dash Button Updates
-3. Get MAC address of button on network. I have not yet written a script for this so looking on the wireless router pages is a good start.
 
 
 ## Operation
@@ -27,10 +26,18 @@ sudo ln -s /usr/sbin/dash-button-listen /etc/dash/
 sudo chmod a+x /usr/sbin/dash-button-listen
 sudo chmod a+x /etc/dash/arp-detected.sh
 sudo chmod a+x /etc/dash/dash-add.sh
-sudo chmod a+x /etc/dash/mac-00112233445566.d/10-log-result.sh
+sudo chmod a+x /etc/dash/mac-skeleton.d/10-log-result.sh
 ```
 
-Once you have a MAC address then add a config folder using:
+To get the MAC address for a particular Dash button using the worker script. This will detect Dash buttons from known MAC address prefixes from a MAC address search: http://www.adminsub.net/mac-address-finder/amazon
+```bash
+cd /etc/dash
+sudo ./dash-button-listen detect
+```
+The script will execute and you should click the pre-configured button. A prompt will ask if you wish to create a config folder for that MAC address and you can add scripts to the new config file in /etc/dash/mac-<address>.d directory
+
+
+To manually add a Dash MAC address use:
 
 ```bash
 cd /etc/dash
@@ -44,12 +51,12 @@ cd /etc/dash
 sudo ./dash-button-listen
 ```
 
-Click the preconfigured button and you should see feedback with the MAC address and the scripts executed. If you wish to add to a button's actions then add a script under the mac-<MAC_ADDRESS>.d folder and mark that script as executable using
+Click the preconfigured Dash button and you should see feedback with the MAC address and the scripts executed. If you wish to add to a button's actions then add a script under the mac-<MAC_ADDRESS>.d folder and mark that script as executable using
 
 ```bash
-sudo cp script-name.sh /etc/dash/mac-MAC_ADDRESS>.d/20-script-name.#!/bin/sh
-sudo chmod a+x /etc/dash/mac-MAC_ADDRESS>.d/20-script-name.#!/bin/sh
+sudo cp script-name.sh /etc/dash/mac-<MAC_ADDRESS>.d/20-script-name.sh
+sudo chmod a+x /etc/dash/mac-<MAC_ADDRESS>.d/20-script-name.sh
 
 ```
 
-TODO: Create a script that will detect Dash Buttons and autoconfigure them.
+If you wish to extend the default actions that each button gets then modify the /etc/dash/mac-skeleton.d directory scripts
