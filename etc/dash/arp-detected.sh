@@ -16,7 +16,7 @@ if [ ! -e $PIDFILE ]
     	then
         touch $PIDFILE
         echo "`date +%Y%m%d_%H24%M%S` Processing click for $MAC_ADDRESS"
-        for i in $(find $PROCESS_DIRECTORY -executable -type f); do
+        for i in $(find $PROCESS_DIRECTORY -executable -type f | sort); do
           echo "`date +%Y%m%d_%H24%M%S` Executing $i for $MAC_ADDRESS"
           sh $i $MAC_ADDRESS
         done
