@@ -1,14 +1,12 @@
 #!/bin/bash
-
+# prerequisites
 #sudo apt get install curl jq
 
-DEVICE=$1
-ACTION=$2
+# This script is
 
-if [ "$DEVICE" == "autoconfig" ] || [ "$DEVICE" == "lights" ]
-  then
-    ACTION=$DEVICE
-fi
+ACTION=$1
+DEVICE=$2
+
 source hue.config
 
 test_hue_ip(){
@@ -18,48 +16,44 @@ test_hue_ip(){
     then
       return 0;
   else
-        curl -m 2 -s -X HEAD http://$TEST_IP | grep hue  >> /dev/null 2>&1 &&
-                return 1  ||
-                return 0
-
+      TEST_IP_RESULT=$(curl -m 2 -s -X HEAD http://$TEST_IP | grep -o "$HUE_SEARCH_STRING")
+      if [ "$TEST_IP_RESULT" == "$HUE_SEARCH_STRING" ]
+       then
+         # This contains " hue " in the HEAD request output
+         echo " IP Address $TEST_IP is likely a Hue Bridge. Probing for Hue API"
+         HUE_PROBE_RESPONSE=$(curl -s -X POST -d '{"devicetype":"hue_script"}'  http://$TEST_IP/api/ | jq -r '.[0] | .error.description + .success.username')
+         if [ "$HUE_PROBE_RESPONSE" == "$HUE_BUTTON_SEARCH_STRING" ]
+           then
+             echo " IP Address $TEST_IP is a Hue Bridge"
+             return 1
+         fi
+      else
+         return 0
+      fi
   fi
 }
 
 find_hue_ip(){
  # find the IP address of the hue bridge on the network
-for adapter in $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d'); do
-        # get Netmask
-
-        IP_ADDR=`ifconfig $adapter | grep "inet " | cut -d ':' -f 2 | cut -d ' ' -f 1`
-        NET_ADDR=`ifconfig $adapter | grep "inet " | rev | cut -d ':' -f 1 | rev`
-
-        IFS=. read -r i1 i2 i3 i4 <<< $IP_ADDR
-        IFS=. read -r m1 m2 m3 m4 <<< $NET_ADDR
-        NET_START=`printf "%d.%d.%d.%d\n" "$((i1 & m1))" "$((i2 & m2))" "$((i3 & m3))" "$((i4 & m4))"`
-        if [ "$NET_START" == "0.0.0.0" ]
-                then
-                        continue
-        fi
-
-        HUE_IP=
-        RETVAL=0
-        for ip in $(nmap -n -p80 $NET_START/24 -oG - | grep "80/open" | awk '{print $2}'); do
-                test_hue_ip $ip
-                if [ $? == 1 ]
-                  then
-                    HUE_IP=$ip
-                    RETVAL=1
-                    break
-                else
-                        continue
-                fi
-        done
-done
+  HUE_IP=
+  RETVAL=0
+  for ip in `./scan-network.sh 80`; do
+    echo "Probing $ip"
+    test_hue_ip $ip
+    if [ $? == 1 ]
+      then
+        HUE_IP=$ip
+        return 1
+        break
+    else
+        continue
+    fi
+  done
 return $RETVAL
 }
 show-lights(){
   # get lights from HUE bridge and display them with respective ID values
-  curl http://$BRIDGE/api/$USER/lights
+  curl -s http://$BRIDGE/api/$USER/lights | jq -r 'keys[] as $k | "\($k)=\(.[$k] | .name) (\(.[$k] | if (.state.on == "true") then "On" else "Off" end))"'
 }
 
 configure_hue(){
@@ -84,6 +78,10 @@ if [ -z "$HUE_IP" ]
   if [ "$?" == "0" ]
     then
       echo "Unable to locate bridge from automatic scan of network"
+  else
+      echo "Hue device found @ $HUE_IP. writing hue.config..."
+      sed -i 's,^\(BRIDGE=\).*,\1'$HUE_IP',' hue.config
+      BRIDGE=$HUE_IP
   fi
 else
   echo "testing for Hue @ $HUE_IP"
