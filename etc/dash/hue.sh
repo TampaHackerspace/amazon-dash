@@ -7,7 +7,9 @@
 ACTION=$1
 DEVICE=$2
 
-source hue.config
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+source "$DIR/hue.config"
 
 test_hue_ip(){
   # Test IP address to determine if this is a Philips Hue Bridge
