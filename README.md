@@ -18,6 +18,19 @@ Debian linux utils and scripts to manage amazon dash buttons
   5. Disable Dash notifications on your phone
     1. Amazon App > Menu > Notifications > Dash Button Updates
 
+##Installation
+I have not made much of an installer for this but the stuff needs to be copied to the proper locations.
+
+```bash
+git clone git@github.com:TampaHackerspace/amazon-dash.git
+cd amazon_dash
+sudo cp -r etc/dash /etc
+sudo cp etc/init.d/dash-button /etc/init.d
+sudo cp -r usr/sbin/* /usr/sbin
+sudo ln -s /usr/sbin/dash-button-listen /etc/dash/
+sudo /etc/init.d/dash-button start
+
+```
 
 ## Operation
 The scripts can be run in user mode and should be for testing. In order to do so ensure that you set the executable flags...

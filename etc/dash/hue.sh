@@ -4,12 +4,27 @@
 
 # This script is
 
-ACTION=$1
-DEVICE=$2
+#ACTION=$1
+#DEVICE=$2
 
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 source "$DIR/hue.config"
+
+COLOR_GREEN="\"hue\":85,\"sat\":255,\"bri\":128"
+COLOR_RED="\"hue\":0,\"sat\":255,\"bri\":255"
+COLOR_WHITE="\"hue\":0,\"sat\":0,\"bri\":255"
+COLOR_YELLOW="\"hue\":43,\"sat\":255,\"bri\":128"
+COLOR_BLUE="\"hue\":170,\"sat\":255,\"bri\":128"
+COLOR_PINK="\"hue\":213,\"sat\":255,\"bri\":128"
+
+COLOR_GREEN="\"xy\":[0.17,0.7]"
+COLOR_RED="\"xy\":[0.6705,0.3204]"
+COLOR_WHITE="\"xy\":[0.4255,0.3998]"
+COLOR_YELLOW="\"xy\":[0.428,0.5024]"
+COLOR_BLUE="\"xy\":[0.168.0.041]"
+COLOR_PINK="\"xy\":[0.3824,0.1601]"
+
 
 test_hue_ip(){
   # Test IP address to determine if this is a Philips Hue Bridge
@@ -117,11 +132,11 @@ fi
 }
 
 light_on(){
-    curl -s -X PUT -d '{"on":true}'  http://$BRIDGE/api/$USER/lights/$DEVICE/state
+    curl -w "\n" -s -X PUT -d '{"on":true$BRI}'  http://$BRIDGE/api/$USER/lights/$DEVICE/state
 }
 
 light_off(){
-    curl -s -X PUT -d '{"on":false}'  http://$BRIDGE/api/$USER/lights/$DEVICE/state
+    curl -w "\n" -s -X PUT -d '{"on":false}'  http://$BRIDGE/api/$USER/lights/$DEVICE/state
 }
 
 light_toggle(){
@@ -136,11 +151,91 @@ light_toggle(){
 }
 
 light_status(){
-    STATUS=$(curl -s http://$BRIDGE/api/$USER/lights/$DEVICE | jq '.|.state.on')
+    STATUS=$(curl -w "\n" -s http://$BRIDGE/api/$USER/lights/$DEVICE | jq '.|.state.on')
 }
+
+light_color_get(){
+
+  COLOR=$(curl -w "\n" -s http://$BRIDGE/api/$USER/lights/$DEVICE | jq '.|.state.xy' | sed ':a;N;$!ba;s/[\n \t]//g')
+  if [[ "\"xy\":$COLOR" == "$COLOR_GREEN" ]]; then
+    COLOR="green"
+  elif [[ "\"xy\":$COLOR" == *"$COLOR_RED"* ]]; then
+    COLOR="red"
+  elif [[ "\"xy\":$COLOR" == *"$COLOR_BLUE"* ]]; then
+    COLOR="blue"
+  elif [[ "\"xy\":$COLOR" == *"$COLOR_PINK"* ]]; then
+    COLOR="pink"
+  elif [[ "\"xy\":$COLOR" == *"$COLOR_WHITE"* ]]; then
+    COLOR="white"
+  elif [[ "\"xy\":$COLOR" == *"$COLOR_YELLOW"* ]]; then
+    COLOR="yellow"
+  fi
+  echo $COLOR
+}
+
+light_color_set(){
+    curl -w "\n" -s -X PUT -d "{$COLOR$BRI}"  http://$BRIDGE/api/$USER/lights/$DEVICE/state
+}
+
+while [ "$1" != "" ]; do
+  case $1 in
+    -d | --device )           shift
+                              DEVICE=$1
+                              ;;
+      -a | --action )         shift
+		              ACTION=$1
+                              ;;
+      -c | --color )          shift
+                              COLOR=$1
+                              ;;
+      -b | --brightness )     shift
+			      BRIGHT=$1
+			      ;;
+      * )                     usage
+                              exit 1
+  esac
+  shift
+done
+
+
+if [ "${ACTION,,}" = "color" ]; then
+  case ${COLOR,,} in
+    red | r ) 
+      COLOR=$COLOR_RED
+      ;;
+    yellow | y )
+      COLOR=$COLOR_YELLOW
+      ;;
+    green | g )
+      COLOR=$COLOR_GREEN
+      ;;
+    white | w )
+      COLOR=$COLOR_WHITE
+      ;;
+    blue | b )
+      COLOR=$COLOR_BLUE
+      ;;
+    pink | p )
+      COLOR=$COLOR_PINK
+      ;;
+  esac
+fi
+
+BRI=
+if [[ "$BRIGHT" != "" ]]; then
+ BRI=",\"bri\":$BRIGHT"
+fi
 
 
 case "$ACTION" in
+  color)
+    if [ "$COLOR" = "" ]; then
+      light_color_get
+    else
+      light_color_set
+    fi
+    ;;
+
   on)
     light_on
     ;;
@@ -160,5 +255,5 @@ case "$ACTION" in
     show-lights
     ;;
   *)
-    echo "Usage: $0 # {on|off|toggle|status|autoconfig|lights}"
+    echo "Usage: $0 {-d|--device} # {-a|--action} {on|off|toggle|status|autoconfig|lights|color} [-b|--brightness 0-255] [-c|--color [red|yellow|white|green|blue|pink]]"
 esac
