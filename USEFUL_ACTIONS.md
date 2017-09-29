@@ -19,13 +19,13 @@ sudo chmod a+x /etc/dash/scan-network.sh
 Now we are ready to configure the script to work with the Hue Bridge. This can either be done manually by editing the /etc/dash/hue.config script with the IP address of the hue bridge and the API key (see [Philips Hue API Getting Started](http://www.developers.meethue.com/documentation/getting-started) for getting the key) or by running the autoconfig script after pressing the button on the Hue Bridge
 
 ```bash
-sudo /etc/dash/hue.sh autoconfig
+sudo /etc/dash/hue.sh --action autoconfig
 ```
 
 You will need to know which lights are to be controlled and reference them by a unique ID number. The [hue.sh](https://github.com/TampaHackerspace/amazon-dash/blob/master/etc/dash/hue.sh) script will once again help with that.
 
 ```bash
-/etc/dash/hue.sh lights
+/etc/dash/hue.sh --action lights
 ```
 
 This will return a list of the light indexes, names associated with those lights and the status (On or Off) of those lights.
@@ -50,4 +50,4 @@ To find all SSH servers on the network (useful for finding devices like Raspberr
 ./scan-network.sh 22
 ```
 
-Last updated by bald-kevin 20160820
+Last updated by bald-kevin 20170929

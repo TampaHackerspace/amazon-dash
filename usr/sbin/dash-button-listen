@@ -15,7 +15,7 @@ detect = False
 def isAmazonMAC(mac_address):
     "This will test a mac address and return a true if it matches known MAC prefixes"
     # See http://www.adminsub.net/mac-address-finder/amazon
-    amazon_mac_prefix = ['f0d2f1','f0272d','a002dc','84d6d0','74c246','747548','50f5da','44650d','0c47c9']
+    amazon_mac_prefix = ['F0D2F1','F0272D','AC63BE','A002DC','8871E5','84D6D0','74C246','747548','6854FD','50F5DA','44650D','34D270','0C47C9']
     if mac_address.lower()[:6] in amazon_mac_prefix:
         return True
     return False
@@ -25,9 +25,9 @@ def AskYesNo(prompt_str):
     while True:
         user_input = raw_input(prompt_str + ' (Y/n)?: ')
         print user_input
-        if user_input in ['Yes','Y','y','']:
+        if user_input in ['Yes','yes','Y','y','']:
             return True
-        if user_input in ['No','N','n']:
+        if user_input in ['No','no','N','n']:
             return False
 
 
@@ -52,7 +52,7 @@ while True:
         arp_header = packet[0][14:42]
         arp_detailed = struct.unpack('2s2s1s1s2s6s4s6s4s', arp_header)
     except Exception as e:
-        print "Exception occured when unpacking arp packet" 
+        print "Exception occured when unpacking arp packet"
 
     # skip non-ARP packets
     ethertype = ethernet_detailed[2]

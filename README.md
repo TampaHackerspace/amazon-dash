@@ -18,11 +18,14 @@ Debian linux utils and scripts to manage amazon dash buttons
   5. Disable Dash notifications on your phone
     1. Amazon App > Menu > Notifications > Dash Button Updates
 
-##Installation
+## Installation
 I have not made much of an installer for this but the stuff needs to be copied to the proper locations.
 
+The script [Useful Actions](USEFUL_ACTIONS.md) contains some prerequisites for [Phillips Hue](USEFUL_ACTIONS.md#philips-hue-lights) and for the autodetect requirements such as [Network Scanner](USEFUL_ACTIONS.md#network-scanner).
+
 ```bash
-git clone git@github.com:TampaHackerspace/amazon-dash.git
+sudo apt-get install python3 git
+git clone https://github.com/TampaHackerspace/amazon-dash.git
 cd amazon_dash
 sudo cp -r etc/dash /etc
 sudo cp etc/init.d/dash-button /etc/init.d
@@ -47,7 +50,7 @@ To get the MAC address for a particular Dash button using the worker script. Thi
 cd /etc/dash
 sudo ./dash-button-listen detect
 ```
-The script will execute and you should click the pre-configured button. A prompt will ask if you wish to create a config folder for that MAC address and you can add scripts to the new config file in /etc/dash/mac-<address>.d directory
+The script will execute and you should click the pre-configured button. A prompt will ask if you wish to create a config folder for that MAC address and you can add scripts to the new config file in /etc/dash/mac-&lt;address&gt;.d directory
 
 
 To manually add a Dash MAC address use:
@@ -72,7 +75,7 @@ sudo chmod a+x /etc/dash/mac-<MAC_ADDRESS>.d/20-script-name.sh
 
 ```
 
-If you wish to extend the default actions that each button gets then modify the /etc/dash/mac-skeleton.d directory scripts
+If you wish to extend the default actions that each button gets when initially created/configured then modify or add to the /etc/dash/mac-skeleton.d directory scripts
 
 
-Last Update: 201608090201 by bald-kevin
+Last Update: 20170929 by bald-kevin
